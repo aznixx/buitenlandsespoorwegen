@@ -9,6 +9,8 @@ import javafx.stage.Stage;
 public class OVChipkaartApp extends Application {
 
     private static Stage mainStage;
+    private static boolean darkMode = false;
+    private static boolean dutch = false;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -19,9 +21,10 @@ public class OVChipkaartApp extends Application {
     public static void showLoginScreen() throws Exception {
         FXMLLoader loader = new FXMLLoader(OVChipkaartApp.class.getResource("login-view.fxml"));
         Parent root = loader.load();
-        Scene scene = new Scene(root, 450, 500);
-        scene.getStylesheets().add(OVChipkaartApp.class.getResource("style.css").toExternalForm());
-        mainStage.setTitle("OV-chipkaart - Login");
+        Scene scene = new Scene(root, 450, 550);
+        String css = darkMode ? "style-dark.css" : "style.css";
+        scene.getStylesheets().add(OVChipkaartApp.class.getResource(css).toExternalForm());
+        mainStage.setTitle("Binnenlandse Spoorwegen - Login");
         mainStage.setScene(scene);
         mainStage.show();
     }
@@ -31,11 +34,18 @@ public class OVChipkaartApp extends Application {
         Parent root = loader.load();
         MainController controller = loader.getController();
         controller.setAccount(account);
-        Scene scene = new Scene(root, 850, 650);
-        scene.getStylesheets().add(OVChipkaartApp.class.getResource("style.css").toExternalForm());
-        mainStage.setTitle("OV-chipkaart - " + account.getName());
+        Scene scene = new Scene(root, 900, 700);
+        String css = darkMode ? "style-dark.css" : "style.css";
+        scene.getStylesheets().add(OVChipkaartApp.class.getResource(css).toExternalForm());
+        mainStage.setTitle("Binnenlandse Spoorwegen - " + account.getName());
         mainStage.setScene(scene);
     }
+
+    public static boolean isDarkMode() { return darkMode; }
+    public static void setDarkMode(boolean dark) { darkMode = dark; }
+    public static boolean isDutch() { return dutch; }
+    public static void setDutch(boolean nl) { dutch = nl; }
+    public static Stage getStage() { return mainStage; }
 
     public static void main(String[] args) {
         launch(args);

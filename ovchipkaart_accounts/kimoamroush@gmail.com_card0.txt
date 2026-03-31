@@ -1,0 +1,22 @@
+3528-1313-2369-1733
+true
+49.11
+false
+SECOND
+NONE
+2031-03-27
+false
+0.0
+0.0
+0.89
+0.0
+1
+false
+null
+0
+false
+false
+null
+2
+2026-03-27T13:36:07.752714200;TOP_UP;50.0;50.0;Top-up €50.00 (machine)
+2026-03-27T13:36:35.371730100;TRAVEL;-0.89;49.11;Amsterdam Centraal → Amsterdam Centraal (TRAIN, SECOND)

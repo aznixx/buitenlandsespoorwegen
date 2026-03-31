@@ -2,16 +2,23 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.geometry.Insets?>
 
 <VBox spacing="10" xmlns:fx="http://javafx.com/fxml" fx:controller="nl.ovchipkaart.ui.MainController">
     <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
 
-    <HBox spacing="15" alignment="CENTER_LEFT">
-        <Label text="OV-chipkaart" styleClass="title"/>
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <ImageView fitHeight="30" preserveRatio="true">
+            <Image url="@logo.png"/>
+        </ImageView>
+        <Label text="Binnenlandse Spoorwegen" styleClass="title"/>
         <Region HBox.hgrow="ALWAYS"/>
+        <ImageView fx:id="profileImageView" fitWidth="35" fitHeight="35"/>
         <Label fx:id="welcomeLabel" styleClass="label-bold"/>
-        <Button text="Logout" onAction="#onLogout" styleClass="logout-button"/>
+        <Button fx:id="langButton" text="NL" onAction="#onToggleLanguage" prefWidth="40"/>
+        <Button fx:id="darkModeButton" text="Dark" onAction="#onToggleDarkMode" prefWidth="50"/>
+        <Button fx:id="logoutButton" text="Logout" onAction="#onLogout" styleClass="logout-button"/>
     </HBox>
 
     <HBox spacing="15" alignment="CENTER_LEFT" styleClass="card-info-bar">
@@ -29,14 +36,15 @@
 
     <TabPane fx:id="tabPane" VBox.vgrow="ALWAYS">
 
-        <Tab text="Travel" closable="false">
+        <Tab fx:id="travelTab" text="Travel" closable="false">
+            <ScrollPane fitToWidth="true">
             <VBox spacing="15">
                 <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
 
                 <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Label text="Station:" styleClass="label-bold"/>
+                    <Label fx:id="stationLabel" text="Station:" styleClass="label-bold"/>
                     <ComboBox fx:id="stationComboBox" prefWidth="200"/>
-                    <Label text="Transport:" styleClass="label-bold"/>
+                    <Label fx:id="transportLabel" text="Transport:" styleClass="label-bold"/>
                     <ComboBox fx:id="transportComboBox" prefWidth="100"/>
                 </HBox>
 
@@ -44,57 +52,109 @@
                         styleClass="tap-button" prefWidth="200" prefHeight="40"/>
 
                 <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Label text="Class:" styleClass="label-bold"/>
+                    <Label fx:id="classLabel" text="Class:" styleClass="label-bold"/>
                     <ComboBox fx:id="travelClassComboBox" prefWidth="100"/>
-                    <Label text="Subscription:" styleClass="label-bold"/>
+                    <Label fx:id="subscriptionLabel" text="Subscription:" styleClass="label-bold"/>
                     <ComboBox fx:id="subscriptionComboBox" prefWidth="160"/>
                 </HBox>
 
                 <Separator/>
 
                 <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Button text="Buy Day Pass (€22.50)" onAction="#onBuyDayPass"/>
+                    <Button fx:id="dayPassButton" text="Buy Day Pass (€22.50)" onAction="#onBuyDayPass"/>
                     <Label fx:id="dayPassLabel" styleClass="status"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Missed Checkout Penalty" onAction="#onMissedCheckout"
-                            styleClass="penalty-button"/>
-                </HBox>
-            </VBox>
-        </Tab>
-
-        <Tab text="Top Up" closable="false">
-            <VBox spacing="15">
-                <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
-
-                <Label text="Manual Top-Up" styleClass="label-bold"/>
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Label text="Amount: €"/>
-                    <TextField fx:id="topUpAmountField" prefWidth="100" promptText="25.00"/>
-                    <Button text="Machine (min €5)" onAction="#onMachineTopUp" styleClass="tap-button"/>
-                    <Button text="Online (min €10)" onAction="#onOnlineTopUp" styleClass="tap-button"/>
+                    <Button fx:id="missedCheckoutButton" text="Missed Checkout Penalty"
+                            onAction="#onMissedCheckout" styleClass="penalty-button"/>
                 </HBox>
 
                 <Separator/>
 
-                <Label text="Auto Top-Up" styleClass="label-bold"/>
+                <Label fx:id="fareEstimatorTitle" text="Fare Estimator" styleClass="label-bold"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label fx:id="fromLabel" text="From:"/>
+                    <ComboBox fx:id="fromStationComboBox" prefWidth="160"/>
+                    <Label fx:id="toLabel" text="To:"/>
+                    <ComboBox fx:id="toStationComboBox" prefWidth="160"/>
+                    <Button fx:id="estimateButton" text="Estimate" onAction="#onEstimateFare"
+                            styleClass="tap-button"/>
+                </HBox>
+                <Label fx:id="fareEstimateLabel" styleClass="status"/>
+
+                <Separator/>
+
+                <Label fx:id="ovFietsTitle" text="OV-fiets" styleClass="label-bold"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Button fx:id="rentBikeButton" text="Rent OV-fiets (€3.85)" onAction="#onRentBike"
+                            styleClass="tap-button"/>
+                    <Button fx:id="returnBikeButton" text="Return OV-fiets" onAction="#onReturnBike"/>
+                    <Label fx:id="bikeStatusLabel" styleClass="status"/>
+                </HBox>
+            </VBox>
+            </ScrollPane>
+        </Tab>
+
+        <Tab fx:id="topUpTab" text="Top Up" closable="false">
+            <ScrollPane fitToWidth="true">
+            <VBox spacing="15">
+                <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+
+                <Label fx:id="manualTopUpTitle" text="Manual Top-Up" styleClass="label-bold"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="€"/>
+                    <TextField fx:id="topUpAmountField" prefWidth="100" promptText="25.00"/>
+                    <Button fx:id="machineButton" text="Machine (min €5)" onAction="#onMachineTopUp"
+                            styleClass="tap-button"/>
+                    <Button fx:id="onlineButton" text="Online (min €10)" onAction="#onOnlineTopUp"
+                            styleClass="tap-button"/>
+                </HBox>
+
+                <Separator/>
+
+                <Label fx:id="autoTopUpTitle" text="Auto Top-Up" styleClass="label-bold"/>
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <CheckBox fx:id="autoTopUpCheckBox" text="Enable auto top-up"/>
                 </HBox>
                 <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Label text="When balance drops below €"/>
+                    <Label text="€"/>
                     <TextField fx:id="autoTopUpThresholdField" prefWidth="70" promptText="10.00"/>
-                    <Label text="add €"/>
+                    <Label text="+  €"/>
                     <TextField fx:id="autoTopUpAmountField" prefWidth="70" promptText="30.00"/>
-                    <Button text="Apply" onAction="#onAutoTopUpApply"/>
+                    <Button fx:id="applyButton" text="Apply" onAction="#onAutoTopUpApply"/>
+                </HBox>
+
+                <Separator/>
+
+                <Label fx:id="transferTitle" text="Transfer Between Cards" styleClass="label-bold"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <ComboBox fx:id="transferCardComboBox" prefWidth="250"/>
+                    <Label text="€"/>
+                    <TextField fx:id="transferAmountField" prefWidth="80" promptText="10.00"/>
+                    <Button fx:id="transferButton" text="Transfer" onAction="#onTransfer"
+                            styleClass="tap-button"/>
+                </HBox>
+
+                <Separator/>
+
+                <Label fx:id="loyaltyTitle" text="Loyalty Points" styleClass="label-bold"/>
+                <Label fx:id="loyaltyLabel" styleClass="status"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <TextField fx:id="redeemPointsField" prefWidth="80" promptText="100"/>
+                    <Button fx:id="redeemButton" text="Redeem (100 pts = €1)" onAction="#onRedeemPoints"
+                            styleClass="tap-button"/>
                 </HBox>
             </VBox>
+            </ScrollPane>
         </Tab>
 
-        <Tab text="Transactions" closable="false">
+        <Tab fx:id="transactionsTab" text="Transactions" closable="false">
             <VBox spacing="10">
                 <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
                 <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Button text="Refund Last Trip" onAction="#onRefund"/>
+                    <Button fx:id="refundButton" text="Refund Last Trip" onAction="#onRefund"/>
+                    <Label text="Filter:" styleClass="label-bold"/>
+                    <ComboBox fx:id="filterComboBox" prefWidth="120"/>
+                    <Button fx:id="exportButton" text="Export CSV" onAction="#onExportCSV"/>
                     <Region HBox.hgrow="ALWAYS"/>
                     <Label fx:id="monthSummaryLabel" styleClass="status"/>
                 </HBox>
@@ -102,27 +162,63 @@
             </VBox>
         </Tab>
 
-        <Tab text="Account" closable="false">
+        <Tab fx:id="accountTab" text="Account" closable="false">
+            <ScrollPane fitToWidth="true">
             <VBox spacing="15">
                 <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
 
-                <Label text="My Cards" styleClass="label-bold"/>
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Button text="Add Personal Card" onAction="#onAddPersonalCard"/>
-                    <Button text="Add Anonymous Card" onAction="#onAddAnonCard"/>
-                    <Button text="Remove Selected Card" onAction="#onRemoveCard" styleClass="penalty-button"/>
+                <Label fx:id="profileTitle" text="Profile" styleClass="label-bold"/>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <ImageView fx:id="profileImageLarge" fitWidth="60" fitHeight="60"/>
+                    <VBox spacing="5">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <TextField fx:id="editNameField" prefWidth="150" promptText="New name"/>
+                            <Button fx:id="changeNameButton" text="Change Name" onAction="#onChangeName"/>
+                        </HBox>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <PasswordField fx:id="oldPasswordField" prefWidth="100" promptText="Old password"/>
+                            <PasswordField fx:id="newPasswordField" prefWidth="100" promptText="New password"/>
+                            <Button fx:id="changePasswordButton" text="Change Password"
+                                    onAction="#onChangePassword"/>
+                        </HBox>
+                        <Button fx:id="uploadPhotoButton" text="Upload Photo" onAction="#onUploadPhoto"/>
+                    </VBox>
                 </HBox>
 
                 <Separator/>
 
-                <Label text="Statistics" styleClass="label-bold"/>
+                <Label fx:id="myCardsTitle" text="My Cards" styleClass="label-bold"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Button fx:id="addPersonalButton" text="Add Personal Card" onAction="#onAddPersonalCard"/>
+                    <Button fx:id="addAnonButton" text="Add Anonymous Card" onAction="#onAddAnonCard"/>
+                    <Button fx:id="removeCardButton" text="Remove Selected Card" onAction="#onRemoveCard"
+                            styleClass="penalty-button"/>
+                </HBox>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Button fx:id="blockButton" text="Block Card" onAction="#onBlockCard"
+                            styleClass="penalty-button"/>
+                    <Button fx:id="unblockButton" text="Unblock Card" onAction="#onUnblockCard"
+                            styleClass="tap-button"/>
+                    <Button fx:id="groupDayPassButton" text="Group Day Pass" onAction="#onGroupDayPass"/>
+                </HBox>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <CheckBox fx:id="balanceProtectionCheckBox" text="Balance Protection (reduced penalty)"
+                              onAction="#onBalanceProtection"/>
+                </HBox>
+
+                <Separator/>
+
+                <Label fx:id="statsTitle" text="Statistics" styleClass="label-bold"/>
                 <Label fx:id="statsLabel" wrapText="true"/>
 
                 <Separator/>
 
-                <Label text="Card Info" styleClass="label-bold"/>
+                <Label fx:id="cardInfoTitle" text="Card Info" styleClass="label-bold"/>
                 <Label fx:id="cardInfoLabel" wrapText="true"/>
             </VBox>
+            </ScrollPane>
         </Tab>
 
     </TabPane>

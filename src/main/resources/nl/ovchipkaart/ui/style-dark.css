@@ -1,0 +1,177 @@
+.root {
+    -fx-base: #2b2b2b;
+    -fx-background: #1e1e2e;
+    -fx-control-inner-background: #333344;
+    -fx-accent: #FFC917;
+    -fx-focus-color: #FFC917;
+}
+
+.label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFC917;
+}
+
+.subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #aaaaaa;
+}
+
+.label-bold {
+    -fx-font-weight: bold;
+    -fx-text-fill: #e0e0e0;
+}
+
+.field-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFC917;
+}
+
+.balance {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFC917;
+}
+
+.status {
+    -fx-font-style: italic;
+    -fx-text-fill: #aaaaaa;
+}
+
+.card-type {
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFC917;
+    -fx-background-color: #003082;
+    -fx-padding: 3 10;
+    -fx-background-radius: 10;
+}
+
+.card-info-bar {
+    -fx-background-color: #2a2a3a;
+    -fx-background-radius: 8;
+    -fx-border-color: #FFC917;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+}
+
+.login-container {
+    -fx-background-color: #1e1e2e;
+}
+
+.tap-button {
+    -fx-background-color: #003082;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20;
+    -fx-background-radius: 5;
+}
+
+.tap-button:hover {
+    -fx-background-color: #004bb5;
+}
+
+.register-button {
+    -fx-background-color: #FFC917;
+    -fx-text-fill: #1e1e2e;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20;
+    -fx-background-radius: 5;
+}
+
+.register-button:hover {
+    -fx-background-color: #ffd84d;
+}
+
+.logout-button {
+    -fx-background-color: #555555;
+    -fx-text-fill: white;
+    -fx-background-radius: 5;
+}
+
+.logout-button:hover {
+    -fx-background-color: #777777;
+}
+
+.penalty-button {
+    -fx-background-color: #cc0000;
+    -fx-text-fill: white;
+    -fx-background-radius: 5;
+}
+
+.penalty-button:hover {
+    -fx-background-color: #ee0000;
+}
+
+.warning {
+    -fx-text-fill: #ff4444;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.message {
+    -fx-text-fill: #FFC917;
+    -fx-font-style: italic;
+}
+
+.text-field, .password-field {
+    -fx-background-color: #333344;
+    -fx-text-fill: #e0e0e0;
+    -fx-prompt-text-fill: #888888;
+    -fx-border-color: #555555;
+    -fx-border-radius: 3;
+}
+
+.combo-box {
+    -fx-background-color: #333344;
+    -fx-border-color: #555555;
+}
+
+.check-box {
+    -fx-text-fill: #e0e0e0;
+}
+
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: #2a2a3a;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #333344;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #003082;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.separator .line {
+    -fx-border-color: #444444;
+}
+
+.list-view {
+    -fx-background-color: #2a2a3a;
+    -fx-border-color: #444444;
+}
+
+.list-view .list-cell {
+    -fx-background-color: #2a2a3a;
+    -fx-text-fill: #e0e0e0;
+}
+
+.list-view .list-cell:selected {
+    -fx-background-color: #003082;
+}
+
+.scroll-pane {
+    -fx-background-color: #1e1e2e;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: #1e1e2e;
+}

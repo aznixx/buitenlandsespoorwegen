@@ -93,6 +93,12 @@
     -fx-background-color: #ee0000;
 }
 
+.warning {
+    -fx-text-fill: #cc0000;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
 .message {
     -fx-text-fill: #003082;
     -fx-font-style: italic;

@@ -10,11 +10,12 @@ public class Account {
     private String email;
     private String password;
     private List<OVCard> cards;
+    private String profilePicturePath;
 
     public Account(String name, String email, String password, boolean personalCard) {
         this.name = name;
         this.email = email;
-        this.password = password;
+        this.password = hashPassword(password);
         this.cards = new ArrayList<>();
         OVCard firstCard = new OVCard(generateCardNumber(), personalCard);
         cards.add(firstCard);
@@ -28,6 +29,14 @@ public class Account {
         return "3528-" + String.format("%04d", (int)(Math.random() * 10000))
                 + "-" + String.format("%04d", (int)(Math.random() * 10000))
                 + "-" + String.format("%04d", (int)(Math.random() * 10000));
+    }
+
+    private static String hashPassword(String raw) {
+        int hash = 0;
+        for (char c : raw.toCharArray()) {
+            hash = 31 * hash + c;
+        }
+        return String.format("%08x", hash);
     }
 
     public OVCard addCard(boolean personal) {
@@ -48,7 +57,51 @@ public class Account {
     }
 
     public boolean checkPassword(String password) {
-        return this.password.equals(password);
+        String hashed = hashPassword(password);
+        return this.password.equals(hashed) || this.password.equals(password);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public boolean changePassword(String oldPassword, String newPassword) {
+        if (!checkPassword(oldPassword)) {
+            return false;
+        }
+        this.password = hashPassword(newPassword);
+        return true;
+    }
+
+    public void setProfilePicture(String path) {
+        this.profilePicturePath = path;
+    }
+
+    public String getProfilePicturePath() {
+        return profilePicturePath;
+    }
+
+    public boolean transferBetweenCards(int fromIndex, int toIndex, double amount) {
+        if (fromIndex == toIndex) {
+            return false;
+        }
+        if (fromIndex < 0 || fromIndex >= cards.size()) {
+            return false;
+        }
+        if (toIndex < 0 || toIndex >= cards.size()) {
+            return false;
+        }
+        return cards.get(fromIndex).transferTo(cards.get(toIndex), amount);
+    }
+
+    public int buyGroupDayPass() {
+        int count = 0;
+        for (OVCard c : cards) {
+            if (c.buyDayPass()) {
+                count = count + 1;
+            }
+        }
+        return count;
     }
 
     public void saveToFile(String folder) {
@@ -63,6 +116,7 @@ public class Account {
             writer.println(email);
             writer.println(password);
             writer.println(cards.size());
+            writer.println(profilePicturePath != null ? profilePicturePath : "null");
             writer.close();
 
             for (int i = 0; i < cards.size(); i++) {
@@ -82,6 +136,12 @@ public class Account {
             account.email = reader.readLine();
             account.password = reader.readLine();
             int cardCount = Integer.parseInt(reader.readLine());
+
+            String pfpLine = reader.readLine();
+            if (pfpLine != null && !pfpLine.equals("null")) {
+                account.profilePicturePath = pfpLine;
+            }
+
             reader.close();
 
             for (int i = 0; i < cardCount; i++) {

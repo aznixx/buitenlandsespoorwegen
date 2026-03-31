@@ -38,6 +38,11 @@ public class OVCard {
     private boolean dayPassActive;
     private LocalDate dayPassDate;
 
+    private int loyaltyPoints;
+    private boolean balanceProtection;
+    private boolean bikeRented;
+    private String bikeRentStationName;
+
     public OVCard(String cardNumber, boolean personal) {
         this.cardNumber = cardNumber;
         this.personal = personal;
@@ -54,6 +59,9 @@ public class OVCard {
         this.totalDistanceKm = 0;
         this.totalTrips = 0;
         this.dayPassActive = false;
+        this.loyaltyPoints = 0;
+        this.balanceProtection = false;
+        this.bikeRented = false;
     }
 
     public boolean isExpired() {
@@ -68,6 +76,10 @@ public class OVCard {
         if (balance < -30) {
             blocked = true;
         }
+    }
+
+    public void block() {
+        this.blocked = true;
     }
 
     public boolean unblock() {
@@ -191,6 +203,7 @@ public class OVCard {
         this.totalSpent = this.totalSpent + fare;
         this.totalDistanceKm = this.totalDistanceKm + distance;
         this.totalTrips = this.totalTrips + 1;
+        this.loyaltyPoints = this.loyaltyPoints + (int) distance;
 
         String desc = checkedInAt.getName() + " → " + station.getName()
                 + " (" + checkedInTransport + ", " + travelClass + ")";
@@ -215,10 +228,13 @@ public class OVCard {
         if (checkedInAt == null) {
             return 0;
         }
-        double penalty = 20.0;
+        double penalty = balanceProtection ? 5.0 : 20.0;
         this.balance = this.balance - penalty;
         this.totalSpent = this.totalSpent + penalty;
         String desc = "Missed checkout penalty (boarded at " + checkedInAt.getName() + ")";
+        if (balanceProtection) {
+            desc = desc + " [PROTECTED]";
+        }
         transactions.add(new Transaction("PENALTY", -penalty, balance, desc));
         this.checkedInAt = null;
         this.checkedInTransport = null;
@@ -254,11 +270,105 @@ public class OVCard {
         return true;
     }
 
-    private boolean isTransfer(LocalDateTime checkInTime) {
+    public boolean transferTo(OVCard other, double amount) {
+        if (amount <= 0 || amount > balance) {
+            return false;
+        }
+        if (isExpired() || blocked) {
+            return false;
+        }
+        if (!other.isPersonal() && (other.balance + amount) > 150) {
+            return false;
+        }
+        this.balance = this.balance - amount;
+        other.balance = other.balance + amount;
+        transactions.add(new Transaction("TRANSFER", -amount, balance,
+                "Transfer to " + other.getCardNumber()));
+        other.transactions.add(new Transaction("TRANSFER", amount, other.balance,
+                "Transfer from " + cardNumber));
+        return true;
+    }
+
+    public double estimateFare(Station from, Station to, TransportType transport) {
+        return calculateFare(from, to, transport, LocalDateTime.now());
+    }
+
+    public boolean rentBike(String stationName) {
+        if (bikeRented) {
+            return false;
+        }
+        if (balance < 3.85) {
+            return false;
+        }
+        if (isExpired() || blocked) {
+            return false;
+        }
+        this.balance = this.balance - 3.85;
+        this.bikeRented = true;
+        this.bikeRentStationName = stationName;
+        transactions.add(new Transaction("OV_FIETS", -3.85, balance,
+                "OV-fiets rental at " + stationName));
+        return true;
+    }
+
+    public boolean returnBike() {
+        if (!bikeRented) {
+            return false;
+        }
+        this.bikeRented = false;
+        this.bikeRentStationName = null;
+        return true;
+    }
+
+    public boolean redeemLoyaltyPoints(int points) {
+        if (points <= 0 || points > loyaltyPoints) {
+            return false;
+        }
+        double credit = points / 100.0;
+        this.loyaltyPoints = this.loyaltyPoints - points;
+        this.balance = this.balance + credit;
+        transactions.add(new Transaction("LOYALTY", credit, balance,
+                "Redeemed " + points + " points for €" + String.format("%.2f", credit)));
+        return true;
+    }
+
+    public void setBalanceProtection(boolean enabled) {
+        this.balanceProtection = enabled;
+    }
+
+    public List<Transaction> getFilteredTransactions(String typeFilter) {
+        if (typeFilter == null || typeFilter.equals("ALL")) {
+            return transactions;
+        }
+        List<Transaction> filtered = new ArrayList<>();
+        for (Transaction tx : transactions) {
+            if (tx.getType().equals(typeFilter)) {
+                filtered.add(tx);
+            }
+        }
+        return filtered;
+    }
+
+    public void exportToCSV(String filename) {
+        try {
+            PrintWriter writer = new PrintWriter(new FileWriter(filename));
+            writer.println("Date,Type,Amount,Balance,Description");
+            for (Transaction tx : transactions) {
+                writer.println(tx.getDateTime() + "," + tx.getType() + ","
+                        + tx.getAmount() + "," + tx.getBalanceAfter() + ","
+                        + "\"" + tx.getDescription() + "\"");
+            }
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("Could not export: " + e.getMessage());
+        }
+    }
+
+    private boolean isTransfer(LocalDateTime time) {
         if (lastCheckoutTime == null || lastCheckoutStation == null) {
             return false;
         }
-        long minutesSinceLastCheckout = Duration.between(lastCheckoutTime, checkInTime).toMinutes();
+        long minutesSinceLastCheckout = Duration.between(lastCheckoutTime, time).toMinutes();
         return minutesSinceLastCheckout >= 0 && minutesSinceLastCheckout <= 35;
     }
 
@@ -275,7 +385,7 @@ public class OVCard {
             fare = 0.89 + 0.19 * distance;
         }
 
-        if (isTransfer(checkInTime)) {
+        if (isTransfer(time)) {
             if (transport == TransportType.BUS || transport == TransportType.TRAM) {
                 fare = 0;
             } else {
@@ -399,6 +509,10 @@ public class OVCard {
             writer.println(totalTrips);
             writer.println(dayPassActive);
             writer.println(dayPassDate != null ? dayPassDate : "null");
+            writer.println(loyaltyPoints);
+            writer.println(balanceProtection);
+            writer.println(bikeRented);
+            writer.println(bikeRentStationName != null ? bikeRentStationName : "null");
             writer.println(transactions.size());
             for (Transaction tx : transactions) {
                 writer.println(tx.getDateTime() + ";" + tx.getType() + ";" + tx.getAmount()
@@ -429,7 +543,25 @@ public class OVCard {
             boolean dayPassActive = Boolean.parseBoolean(reader.readLine());
             String dayPassStr = reader.readLine();
             LocalDate dayPassDate = dayPassStr.equals("null") ? null : LocalDate.parse(dayPassStr);
-            int txCount = Integer.parseInt(reader.readLine());
+
+            int loyaltyPoints = 0;
+            boolean balanceProtection = false;
+            boolean bikeRented = false;
+            String bikeRentStationName = null;
+
+            String nextLine = reader.readLine();
+            try {
+                loyaltyPoints = Integer.parseInt(nextLine);
+                balanceProtection = Boolean.parseBoolean(reader.readLine());
+                bikeRented = Boolean.parseBoolean(reader.readLine());
+                String bikeStn = reader.readLine();
+                bikeRentStationName = bikeStn.equals("null") ? null : bikeStn;
+                nextLine = reader.readLine();
+            } catch (NumberFormatException e) {
+                // old format, nextLine is already txCount
+            }
+
+            int txCount = Integer.parseInt(nextLine);
 
             OVCard card = new OVCard(cardNumber, personal);
             card.balance = balance;
@@ -445,6 +577,10 @@ public class OVCard {
             card.totalTrips = totalTrips;
             card.dayPassActive = dayPassActive;
             card.dayPassDate = dayPassDate;
+            card.loyaltyPoints = loyaltyPoints;
+            card.balanceProtection = balanceProtection;
+            card.bikeRented = bikeRented;
+            card.bikeRentStationName = bikeRentStationName;
 
             for (int i = 0; i < txCount; i++) {
                 String line = reader.readLine();
@@ -487,4 +623,8 @@ public class OVCard {
     public double getTotalDistanceKm() { return totalDistanceKm; }
     public int getTotalTrips() { return totalTrips; }
     public boolean isDayPassActive() { return dayPassActive; }
+    public int getLoyaltyPoints() { return loyaltyPoints; }
+    public boolean isBalanceProtection() { return balanceProtection; }
+    public boolean isBikeRented() { return bikeRented; }
+    public String getBikeRentStationName() { return bikeRentStationName; }
 }
