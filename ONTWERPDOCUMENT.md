@@ -479,4 +479,3 @@ Eindtotaal = €3.84 (afgerond)
 
 ---
 
-*Document gegenereerd voor OOP1 Casus - Sprint 2*
